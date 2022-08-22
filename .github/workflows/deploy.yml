@@ -1,0 +1,38 @@
+# This is a basic workflow to help you get started with Actions
+name: publicacion-db
+
+# Controls when the action will run.
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v1
+      - name: publishes to datasette
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            datasette
+      - name: Install vercel plugin
+        run: |
+          datasette install datasette-publish-vercel
+      - name: Deploy Datasette using Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |-
+          datasette publish vercel elecciones.db \
+            --token $VERCEL_TOKEN \
+            --project elecciones-regionales-2022 \
+            --install datasette-vega \
+            --install datasette-export-notebook \
+            --install datasette-copyable \
+            --install datasette-block-robots \
+            --install datasette-pretty-json

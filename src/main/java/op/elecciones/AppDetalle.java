@@ -48,10 +48,11 @@ public class AppDetalle {
     var httpClient = HttpClient.newBuilder().sslContext(sslContext).build();
     var json = new ObjectMapper();
 
-    var output = Path.of("resultados-filtrados.ndjson");
+    var output = Path.of("resultados-filtrados-lima.ndjson");
     if (!Files.exists(output)) Files.createFile(output);
 
-    var lines = Files.readAllLines(Path.of("filtrados.csv"));
+    //var lines = Files.readAllLines(Path.of("filtrados.csv"));
+    var lines = Files.readAllLines(Path.of("filtrados-lima.csv"));
     lines
       .stream()
       .dropWhile(s -> s.startsWith("idHojaVida"))

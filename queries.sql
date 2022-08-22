@@ -37,3 +37,15 @@ where (cargo like "%GOBERNADOR REGIONAL%"
     (cargo like "%CONSEJERO REGIONAL%")
     or
     (cargo like "%ACCESITARIO%");
+
+
+'LIMA
+
+select idHojaVida, numeroDocumento
+from candidatos
+where
+(
+    cargo like "%REGIDOR PROVINCIAL%"
+    or cargo like "%ALCALDE PROVINCIAL%"
+)
+and "postulaDepartamento" = "LIMA"
