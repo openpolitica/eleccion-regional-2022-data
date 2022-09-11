@@ -15,24 +15,24 @@ where cargo like "%CONSEJERO REGIONAL%";
 select count(1)
 from candidatos
 where cargo like "%ACCESITARIO%";
-'ALL=7210
+'ALL=7471
 select count(1)
 from candidatos
 where (cargo like "%GOBERNADOR REGIONAL%"
     and cargo not like "%VICEGOBERNADOR REGIONAL%")
     or
-    (cargo like "%CONSEJERO REGIONAL%")
+    (cargo like "%VICEGOBERNADOR REGIONAL%")
     or
     (cargo like "%CONSEJERO REGIONAL%")
     or
     (cargo like "%ACCESITARIO%");
 'FILTER
-select cast(idHojaVida as int), numeroDocumento
+select cast(idHojaVida as int) as idHojaVida, numeroDocumento
 from candidatos
 where (cargo like "%GOBERNADOR REGIONAL%"
     and cargo not like "%VICEGOBERNADOR REGIONAL%")
     or
-    (cargo like "%CONSEJERO REGIONAL%")
+    (cargo like "%VICEGOBERNADOR REGIONAL%")
     or
     (cargo like "%CONSEJERO REGIONAL%")
     or

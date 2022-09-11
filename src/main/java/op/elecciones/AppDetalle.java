@@ -14,6 +14,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -48,19 +49,22 @@ public class AppDetalle {
     var httpClient = HttpClient.newBuilder().sslContext(sslContext).build();
     var json = new ObjectMapper();
 
-    var output = Path.of("resultados-filtrados-lima.ndjson");
+    var output = Path.of("resultados-filtrados.ndjson");
+    //var output = Path.of("resultados-filtrados-lima.ndjson");
     if (!Files.exists(output)) Files.createFile(output);
 
-    //var lines = Files.readAllLines(Path.of("filtrados.csv"));
-    var lines = Files.readAllLines(Path.of("filtrados-lima.csv"));
+    var lines = Files.readAllLines(Path.of("filtrados.csv"));
+    //var lines = Files.readAllLines(Path.of("filtrados-lima.csv"));
+
+    final AtomicInteger loader = new AtomicInteger();
+    int onePercent = lines.size() / 100;
+
     lines
       .stream()
       .dropWhile(s -> s.startsWith("idHojaVida"))
       .map(line -> {
         var fields = line.split(",");
-        var idHojaVida = fields[0];
-        System.out.println(idHojaVida);
-        return idHojaVida;
+        return fields[0];
       })
       .map(idHojaVida ->
         HttpRequest
@@ -75,7 +79,15 @@ public class AppDetalle {
           )
           .build()
       )
-//      .parallel() // Too much for the backend
+      .peek(httpRequest -> {
+        if (loader.incrementAndGet() % onePercent == 0) {
+          System.out.print(
+            loader.get() + " elements of " + lines.size() + " treated ("
+          );
+          System.out.println(((loader.get() / onePercent)) + "%)");
+        }
+      })
+      //      .parallel() // Too much for the backend
       .forEach(httpRequest -> {
         try {
           var response = httpClient.send(
