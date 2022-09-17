@@ -18,7 +18,7 @@ jobs:
           distribution: 'zulu'
           cache: 'maven'
       - name: Run extraction
-        run: mvn -B exec:java -D"exec.mainClass"="op.elecciones.AppDetalle"
+        run: mvn -B clean compile exec:java -D"exec.mainClass"="op.elecciones.AppDetalle"
 
       - uses: actions/setup-python@v1
       - name: publishes to datasette
