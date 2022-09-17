@@ -49,61 +49,76 @@ public class AppDetalle {
     var httpClient = HttpClient.newBuilder().sslContext(sslContext).build();
     var json = new ObjectMapper();
 
-    scrape(httpClient, json, Path.of("resultados-filtrados.ndjson"), Path.of("filtrados.csv"));
-    scrape(httpClient, json, Path.of("resultados-filtrados-lima.ndjson"), Path.of("filtrados-lima.csv"));
+    scrape(
+      httpClient,
+      json,
+      Path.of("resultados-filtrados.ndjson"),
+      Path.of("filtrados.csv")
+    );
+    scrape(
+      httpClient,
+      json,
+      Path.of("resultados-filtrados-lima.ndjson"),
+      Path.of("filtrados-lima.csv")
+    );
   }
 
-    private static void scrape(HttpClient httpClient, ObjectMapper json, Path output, Path input) throws IOException {
-        var lines = Files.readAllLines(input);
-        if (!Files.exists(output)) Files.createFile(output);
+  private static void scrape(
+    HttpClient httpClient,
+    ObjectMapper json,
+    Path output,
+    Path input
+  ) throws IOException {
+    var lines = Files.readAllLines(input);
+    if (!Files.exists(output)) Files.createFile(output);
 
-        final AtomicInteger loader = new AtomicInteger();
-        int onePercent = lines.size() / 100;
+    final AtomicInteger loader = new AtomicInteger();
+    int onePercent = lines.size() / 100;
 
-        lines
-          .stream()
-          .dropWhile(s -> s.startsWith("idHojaVida"))
-          .map(line -> {
-            var fields = line.split(",");
-            return fields[0];
-          })
-          .map(idHojaVida ->
-            HttpRequest
-              .newBuilder()
-              .GET()
-              .header("Content-type", "application/json")
-              .uri(
-                URI.create(
-                  "https://apiplataformaelectoral8.jne.gob.pe/api/v1/candidato/hoja-vida?IdHojaVida=" +
-                  idHojaVida
-                )
-              )
-              .build()
+    lines
+      .stream()
+      .dropWhile(s -> s.startsWith("idHojaVida"))
+      .map(line -> {
+        var fields = line.split(",");
+        return fields[0];
+      })
+      .map(idHojaVida ->
+        HttpRequest
+          .newBuilder()
+          .GET()
+          .header("Content-type", "application/json")
+          .uri(
+            URI.create(
+              "https://apiplataformaelectoral8.jne.gob.pe/api/v1/candidato/hoja-vida?IdHojaVida=" +
+              idHojaVida
+            )
           )
-          .peek(httpRequest -> {
-            if (loader.incrementAndGet() % onePercent == 0) {
-              System.out.print(
-                loader.get() + " elements of " + lines.size() + " treated ("
-              );
-              System.out.println(((loader.get() / onePercent)) + "%)");
-            }
-          })
-          //      .parallel() // Too much for the backend
-          .forEach(httpRequest -> {
-            try {
-              var response = httpClient.send(
-                httpRequest,
-                HttpResponse.BodyHandlers.ofByteArray()
-              );
-              var jsonResponse = json.readTree(response.body());
-              Files.writeString(
-                      output,
-                json.writeValueAsString(jsonResponse) + "\n",
-                APPEND
-              );
-            } catch (IOException | InterruptedException e) {
-              throw new RuntimeException(e);
-            }
-          });
-    }
+          .build()
+      )
+      .peek(httpRequest -> {
+        if (loader.incrementAndGet() % onePercent == 0) {
+          System.out.print(
+            loader.get() + " elements of " + lines.size() + " treated ("
+          );
+          System.out.println(((loader.get() / onePercent)) + "%)");
+        }
+      })
+      //      .parallel() // Too much for the backend
+      .forEach(httpRequest -> {
+        try {
+          var response = httpClient.send(
+            httpRequest,
+            HttpResponse.BodyHandlers.ofByteArray()
+          );
+          var jsonResponse = json.readTree(response.body());
+          Files.writeString(
+            output,
+            json.writeValueAsString(jsonResponse) + "\n",
+            APPEND
+          );
+        } catch (IOException | InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      });
+  }
 }
