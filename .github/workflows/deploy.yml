@@ -5,7 +5,8 @@ name: publicacion-db
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
 jobs:
   scrape:
     runs-on: ubuntu-latest
