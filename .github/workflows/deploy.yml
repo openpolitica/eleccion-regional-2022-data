@@ -30,10 +30,7 @@ jobs:
             sqlite-utils
       - name: csv-to-db
         run: |
-#            cat resultados-filtrados.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle --nl --flatten --truncate --alter -
             cat resultados-filtrados.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --truncate --alter -
-
-#            cat resultados-filtrados-lima.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle --nl --flatten --alter -
             cat resultados-filtrados-lima.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --alter -
 
       - name: Install vercel plugin
