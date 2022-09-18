@@ -33,6 +33,15 @@ jobs:
             cat resultados-filtrados.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --truncate --alter -
             cat resultados-filtrados-lima.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --alter -
 
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "DB release"
+          files: |
+            *.db
+
       - name: Install vercel plugin
         run: |
           datasette install datasette-publish-vercel
