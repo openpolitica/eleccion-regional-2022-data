@@ -5,15 +5,21 @@ name: publicacion-db
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
 jobs:
-  deploy:
-    # The type of runner that the job will run on
+  scrape:
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: 'maven'
+      - name: Run extraction
+        run: mvn -B clean compile exec:java -D"exec.mainClass"="op.elecciones.AppDetalle"
 
       - uses: actions/setup-python@v1
       - name: publishes to datasette
@@ -21,6 +27,21 @@ jobs:
         with:
           packages: |
             datasette
+            sqlite-utils
+      - name: csv-to-db
+        run: |
+            cat resultados-filtrados.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --truncate --alter -
+            cat resultados-filtrados-lima.ndjson  | sqlite-utils insert elecciones.db candidatos_detalle_v2 --nl  --alter -
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "DB release"
+          files: |
+            *.db
+
       - name: Install vercel plugin
         run: |
           datasette install datasette-publish-vercel

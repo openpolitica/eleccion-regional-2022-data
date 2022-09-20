@@ -49,12 +49,28 @@ public class AppDetalle {
     var httpClient = HttpClient.newBuilder().sslContext(sslContext).build();
     var json = new ObjectMapper();
 
-    var output = Path.of("resultados-filtrados.ndjson");
-    //var output = Path.of("resultados-filtrados-lima.ndjson");
-    if (!Files.exists(output)) Files.createFile(output);
+    scrape(
+      httpClient,
+      json,
+      Path.of("resultados-filtrados.ndjson"),
+      Path.of("filtrados.csv")
+    );
+    scrape(
+      httpClient,
+      json,
+      Path.of("resultados-filtrados-lima.ndjson"),
+      Path.of("filtrados-lima.csv")
+    );
+  }
 
-    var lines = Files.readAllLines(Path.of("filtrados.csv"));
-    //var lines = Files.readAllLines(Path.of("filtrados-lima.csv"));
+  private static void scrape(
+    HttpClient httpClient,
+    ObjectMapper json,
+    Path output,
+    Path input
+  ) throws IOException {
+    var lines = Files.readAllLines(input);
+    if (!Files.exists(output)) Files.createFile(output);
 
     final AtomicInteger loader = new AtomicInteger();
     int onePercent = lines.size() / 100;
